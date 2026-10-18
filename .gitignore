@@ -1,0 +1,52 @@
+# --- Dependencies ---
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# --- Next.js build output ---
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# --- Testing ---
+/coverage
+
+# --- Environment variables ---
+# Secrets live in .env.local and must never be committed.
+# .env.example (placeholder values only) IS committed so others know what to set.
+.env*
+!.env.example
+
+# --- Supabase CLI (local dev state) ---
+# Keep supabase/config.toml and supabase/migrations/ in git.
+supabase/.branches
+supabase/.temp
+supabase/.env
+
+# --- Vercel ---
+.vercel
+
+# --- Logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- OS / editor clutter ---
+.DS_Store
+Thumbs.db
+*.pem
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# --- Claude Code personal settings ---
+.claude/settings.local.json
