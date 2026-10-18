@@ -35,13 +35,16 @@ A mobile-first habit tracker for small friend groups: users join private groups 
 
 ## Security rules
 
-- Client code only ever uses the Supabase **anon** key. Never use or expose the `service_role` key in app code.
+- App code only ever uses the Supabase **publishable** key (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, the newer name for the anon key). Never use or expose the secret / `service_role` key in app code.
 - Never commit `.env*` files except `.env.example`.
 - Authorization lives in RLS. Hiding a button in the UI is not a permission check.
 
 ## Code conventions
 
 - Prefer Server Components and Server Actions; use `"use client"` components only for interactivity (toggles, forms).
+- Supabase clients: `lib/supabase/server.ts` in Server Components / Server Actions (create one per request), `lib/supabase/client.ts` in Client Components. `proxy.ts` (Next 16's renamed `middleware.ts`) refreshes the session on every request via `lib/supabase/proxy.ts`.
+- Use `supabase.auth.getClaims()` (verified) to check who is logged in on the server, not `getSession()`.
+- With `cacheComponents` on, anything that reads cookies/auth must render inside a `<Suspense>` boundary.
 - Mobile-first Tailwind: design for ~375px wide first; tap targets at least 44px.
 - Dates are `YYYY-MM-DD` strings in the user's local time zone, produced by one shared helper (don't scatter `new Date()` formatting).
 
