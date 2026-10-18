@@ -35,7 +35,29 @@ export async function updateSession(request: NextRequest) {
 
   // Don't put code between createServerClient and getClaims(): this call is
   // what triggers the session refresh.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  const isLoggedIn = Boolean(data?.claims);
+
+  // Redirect logged-out users to /login, and logged-in users away from the
+  // login/signup pages. This is a convenience, not security: pages still
+  // check the user themselves, and RLS protects the data.
+  const path = request.nextUrl.pathname;
+  const isAuthPage = path === "/login" || path === "/signup";
+  const isPublic = isAuthPage || path.startsWith("/auth/");
+
+  if (!isLoggedIn && !isPublic) {
+    return redirectTo("/login", request, response);
+  }
+  if (isLoggedIn && isAuthPage) {
+    return redirectTo("/groups", request, response);
+  }
 
   return response;
+}
+
+// Build a redirect that keeps any refreshed session cookies set above.
+function redirectTo(path: string, request: NextRequest, from: NextResponse) {
+  const redirect = NextResponse.redirect(new URL(path, request.url));
+  from.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+  return redirect;
 }
