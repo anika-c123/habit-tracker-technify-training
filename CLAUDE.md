@@ -6,8 +6,8 @@ A mobile-first habit tracker for small friend groups: users join private groups 
 
 ## Stack
 
-- Next.js (App Router) + TypeScript (strict mode)
-- Tailwind CSS
+- Next.js 16 (App Router, Turbopack, `cacheComponents` on) + React 19 + TypeScript (strict mode). This version has APIs newer than most training data: check `node_modules/next/dist/docs/` before using an unfamiliar API (see `AGENTS.md`).
+- Tailwind CSS v4 (configured in `app/globals.css`, no `tailwind.config` file)
 - Supabase: Auth, Postgres, Row Level Security — via `@supabase/ssr`
 - Hosted on Vercel; PWA support comes later (SPEC step 12)
 
@@ -20,11 +20,9 @@ A mobile-first habit tracker for small friend groups: users join private groups 
 
 ## Commands
 
-_Fill in / confirm after SPEC step 1–2._
-
-- `npm run dev` — local dev server
-- `npm run lint` — lint
-- `npm run build` — production build (run before calling a step done)
+- `npm run dev` — local dev server at http://localhost:3000
+- `npm run lint` — ESLint
+- `npm run build` — production build + type check (run before calling a step done)
 - `npx supabase migration new <name>` — create a new migration file
 - `npx supabase db push` — apply migrations to the linked Supabase project
 
