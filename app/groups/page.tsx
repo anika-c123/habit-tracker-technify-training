@@ -1,11 +1,17 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logOut } from "@/app/auth/actions";
 
 // Placeholder until step 5 builds the real groups list. For now it proves
 // that log-in works and that the profile row was created on sign-up.
 async function Welcome() {
+  // getClaims() checks the token's expiry against the current time, which
+  // Next can't bake into a prefetched page. connection() says "only render
+  // this part during a real request".
+  await connection();
+
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
 
