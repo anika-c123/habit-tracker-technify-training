@@ -4,15 +4,15 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { addDays, toDateString } from "@/lib/dates";
 import { CopyCodeButton } from "./copy-code-button";
-import { HabitCheckbox } from "./habit-checkbox";
+import { TodayHabit } from "./today-habit";
 
 async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params">) {
   const { id } = await params;
   const { supabase, userId } = await requireUser();
 
-  // The server doesn't know the user's time zone, so fetch my check-offs for
-  // yesterday through tomorrow (server time). That window always contains
-  // the user's local "today"; the checkbox picks it out in the browser.
+  // The server doesn't know the user's time zone, so fetch everyone's
+  // check-offs for yesterday through tomorrow (server time). That window
+  // always contains the user's local "today"; the browser picks it out.
   const serverToday = toDateString(new Date());
 
   // Run the queries at the same time. RLS returns nothing if you're not a
@@ -33,8 +33,10 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
       .order("joined_at"),
     supabase
       .from("completions")
-      .select("habit_id, completed_on")
-      .eq("user_id", userId)
+      // completions has no group_id, so join to habits and filter on theirs.
+      // "!inner" means: only keep completions whose habit matches the filter.
+      .select("habit_id, user_id, completed_on, habits!inner(group_id)")
+      .eq("habits.group_id", id)
       .gte("completed_on", addDays(serverToday, -1))
       .lte("completed_on", addDays(serverToday, 1)),
   ]);
@@ -46,7 +48,11 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
 
   const habits = habitsResult.data ?? [];
   const members = membersResult.data ?? [];
-  const myCompletions = completionsResult.data ?? [];
+  const completions = completionsResult.data ?? [];
+  const memberNames = members.map((member) => ({
+    userId: member.user_id,
+    name: member.profiles?.display_name ?? "Unknown",
+  }));
 
   return (
     <>
@@ -54,9 +60,7 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
 
       <section className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium text-foreground/70">
-            Habits ({habits.length})
-          </h2>
+          <h2 className="text-sm font-medium text-foreground/70">Today</h2>
           <Link
             href={`/groups/${id}/habits/new`}
             className="-mr-2 flex h-11 items-center px-2 text-sm font-medium"
@@ -72,13 +76,15 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
           <ul className="flex flex-col divide-y divide-foreground/10 overflow-hidden rounded-lg border border-foreground/15">
             {habits.map((habit) => (
               <li key={habit.id}>
-                <HabitCheckbox
+                <TodayHabit
                   habitId={habit.id}
                   name={habit.name}
                   description={habit.description}
-                  myDoneDates={myCompletions
+                  members={memberNames}
+                  myUserId={userId}
+                  completions={completions
                     .filter((c) => c.habit_id === habit.id)
-                    .map((c) => c.completed_on)}
+                    .map((c) => ({ userId: c.user_id, date: c.completed_on }))}
                 />
               </li>
             ))}

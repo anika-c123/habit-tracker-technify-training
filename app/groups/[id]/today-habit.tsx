@@ -15,17 +15,31 @@ function useToday(): string | null {
   );
 }
 
+export type Member = { userId: string; name: string };
+export type Completion = { userId: string; date: string };
+
 type Props = {
   habitId: string;
   name: string;
   description: string | null;
-  // The days (near today) on which I've done this habit.
-  myDoneDates: string[];
+  members: Member[];
+  myUserId: string;
+  // Everyone's check-offs for this habit on the days near today.
+  completions: Completion[];
 };
 
-export function HabitCheckbox({ habitId, name, description, myDoneDates }: Props) {
+export function TodayHabit({
+  habitId,
+  name,
+  description,
+  members,
+  myUserId,
+  completions,
+}: Props) {
   const today = useToday();
-  const done = today !== null && myDoneDates.includes(today);
+  const isDone = (userId: string) =>
+    completions.some((c) => c.userId === userId && c.date === today);
+  const done = today !== null && isDone(myUserId);
 
   // Optimistic UI: show the new state immediately, before the server answers.
   // While the save is in progress, `optimisticDone` is what we display; when
@@ -45,6 +59,14 @@ export function HabitCheckbox({ habitId, name, description, myDoneDates }: Props
       if (result.error) setError(result.error);
     });
   }
+
+  // My own chip follows the checkbox (optimistic); everyone else's comes
+  // from the server.
+  const memberStatus = members.map((member) => ({
+    ...member,
+    done: member.userId === myUserId ? optimisticDone : isDone(member.userId),
+  }));
+  const doneCount = memberStatus.filter((m) => m.done).length;
 
   return (
     <div className="flex flex-col">
@@ -77,6 +99,31 @@ export function HabitCheckbox({ habitId, name, description, myDoneDates }: Props
         <p aria-live="polite" className="px-4 pb-2 text-sm text-red-600">
           {error}
         </p>
+      )}
+
+      {/* Who's done today. Hidden until the browser knows what "today" is. */}
+      {today !== null && (
+        <div className="flex flex-col gap-1.5 px-4 pb-3 pl-14">
+          <p className="text-xs text-foreground/60">
+            {doneCount} of {members.length} done today
+          </p>
+          <ul className="flex flex-wrap gap-1.5">
+            {memberStatus.map((member) => (
+              <li
+                key={member.userId}
+                className={`rounded-full px-2.5 py-0.5 text-xs ${
+                  member.done
+                    ? "bg-green-600/15 text-green-700 dark:text-green-400"
+                    : "border border-dashed border-foreground/25 text-foreground/50"
+                }`}
+              >
+                {member.done && <span aria-hidden>✓ </span>}
+                {member.userId === myUserId ? "You" : member.name}
+                <span className="sr-only">{member.done ? " (done)" : " (not yet)"}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
