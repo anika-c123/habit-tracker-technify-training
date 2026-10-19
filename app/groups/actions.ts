@@ -1,5 +1,6 @@
 "use server";
 
+import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -80,4 +81,47 @@ export async function createHabit(
   }
 
   redirect(`/groups/${groupId}`);
+}
+
+// Check off (done = true) or undo (done = false) one habit for one day.
+// `date` is the user's local "YYYY-MM-DD", computed in the browser. The
+// database only accepts dates within ±1 day of its own, and only for you.
+export async function setCompletion(
+  habitId: string,
+  date: string,
+  done: boolean,
+): Promise<{ error?: string }> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return { error: "Invalid date." };
+  }
+
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims) {
+    return { error: "You've been logged out. Please log in again." };
+  }
+
+  if (done) {
+    const { error } = await supabase
+      .from("completions")
+      .insert({ habit_id: habitId, completed_on: date });
+    // 23505 = "already exists" (e.g. a double-tap). It's already done, so fine.
+    if (error && error.code !== "23505") {
+      return { error: "Couldn't save. Please try again." };
+    }
+  } else {
+    const { error } = await supabase
+      .from("completions")
+      .delete()
+      .eq("habit_id", habitId)
+      .eq("user_id", data.claims.sub)
+      .eq("completed_on", date);
+    if (error) {
+      return { error: "Couldn't undo. Please try again." };
+    }
+  }
+
+  // Re-render the page on the server so it shows the saved state.
+  refresh();
+  return {};
 }

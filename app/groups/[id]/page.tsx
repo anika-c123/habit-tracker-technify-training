@@ -2,15 +2,22 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { addDays, toDateString } from "@/lib/dates";
 import { CopyCodeButton } from "./copy-code-button";
+import { HabitCheckbox } from "./habit-checkbox";
 
 async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params">) {
   const { id } = await params;
   const { supabase, userId } = await requireUser();
 
-  // Run both queries at the same time. RLS returns nothing if you're not a
+  // The server doesn't know the user's time zone, so fetch my check-offs for
+  // yesterday through tomorrow (server time). That window always contains
+  // the user's local "today"; the checkbox picks it out in the browser.
+  const serverToday = toDateString(new Date());
+
+  // Run the queries at the same time. RLS returns nothing if you're not a
   // member, so outsiders get the same "not found" as a bad link.
-  const [groupResult, habitsResult, membersResult] = await Promise.all([
+  const [groupResult, habitsResult, membersResult, completionsResult] = await Promise.all([
     supabase.from("groups").select("name, invite_code").eq("id", id).maybeSingle(),
     supabase
       .from("habits")
@@ -24,6 +31,12 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
       .select("user_id, role, profiles(display_name)")
       .eq("group_id", id)
       .order("joined_at"),
+    supabase
+      .from("completions")
+      .select("habit_id, completed_on")
+      .eq("user_id", userId)
+      .gte("completed_on", addDays(serverToday, -1))
+      .lte("completed_on", addDays(serverToday, 1)),
   ]);
 
   const group = groupResult.data;
@@ -33,6 +46,7 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
 
   const habits = habitsResult.data ?? [];
   const members = membersResult.data ?? [];
+  const myCompletions = completionsResult.data ?? [];
 
   return (
     <>
@@ -55,16 +69,23 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
             No habits yet. Add the first one for your group.
           </p>
         ) : (
-          <ul className="flex flex-col divide-y divide-foreground/10 rounded-lg border border-foreground/15">
+          <ul className="flex flex-col divide-y divide-foreground/10 overflow-hidden rounded-lg border border-foreground/15">
             {habits.map((habit) => (
-              <li key={habit.id} className="flex min-h-12 flex-col justify-center px-4 py-2">
-                <span className="font-medium">{habit.name}</span>
-                {habit.description && (
-                  <span className="text-sm text-foreground/60">{habit.description}</span>
-                )}
+              <li key={habit.id}>
+                <HabitCheckbox
+                  habitId={habit.id}
+                  name={habit.name}
+                  description={habit.description}
+                  myDoneDates={myCompletions
+                    .filter((c) => c.habit_id === habit.id)
+                    .map((c) => c.completed_on)}
+                />
               </li>
             ))}
           </ul>
+        )}
+        {habits.length > 0 && (
+          <p className="text-xs text-foreground/60">Tap a habit to check it off for today.</p>
         )}
       </section>
 
