@@ -1,9 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Sky blue background, a white check circle (the app's "done" mark) and a
-       short coral wave like the section headings. Everything stays inside the
-       middle 80% so phones can crop the icon into a circle or squircle. -->
+  <!-- Sky blue background with a white check circle (the app's "done" mark).
+       Everything stays inside the middle 80% so phones can crop the icon
+       into a circle or squircle. -->
   <rect width="512" height="512" fill="#3BA9EC"/>
-  <circle cx="256" cy="228" r="112" fill="#ffffff"/>
-  <path d="M200 230 L242 272 L318 190" fill="none" stroke="#34A86A" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M176 392 C 196 372, 216 372, 236 392 S 276 412, 296 392 S 316 372, 336 392" fill="none" stroke="#F26B57" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="128" fill="#ffffff"/>
+  <path d="M192 258 L240 306 L326 212" fill="none" stroke="#34A86A" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
