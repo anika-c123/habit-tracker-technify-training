@@ -2,9 +2,11 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { SectionHeading } from "@/app/ui/section-heading";
 import { addDays, toDateString } from "@/lib/dates";
 import { CopyCodeButton } from "./copy-code-button";
 import { LeaveGroupButton } from "./leave-group-button";
+import { memberColor } from "./member-colors";
 import { TodayHabit } from "./today-habit";
 import { ViewTabs } from "./view-tabs";
 import { WeekHabit } from "./week-habit";
@@ -76,32 +78,37 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
     completions
       .filter((c) => c.habit_id === habitId)
       .map((c) => ({ userId: c.user_id, date: c.completed_on }));
-  const listClass =
-    "flex flex-col divide-y divide-foreground/10 overflow-hidden rounded-lg border border-foreground/15";
+  const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">{group.name}</h1>
+      <header className="flex flex-col gap-1">
+        <h1 className="text-5xl font-medium tracking-tight">{group.name}</h1>
+        <p className="italic text-muted">
+          {plural(members.length, "member")} · {plural(habits.length, "habit")}
+        </p>
+      </header>
 
-      <section className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium text-foreground/70">Habits</h2>
+      {/* -mx-4 px-4 lets the pale blue panel reach the screen edges on phones. */}
+      <section className="-mx-4 flex flex-col gap-6 bg-sky-pale px-4 py-8">
+        <div className="flex items-start justify-between">
+          <SectionHeading color="sky">Habits</SectionHeading>
           <Link
             href={`/groups/${id}/habits/new`}
-            className="-mr-2 flex h-11 items-center px-2 text-sm font-medium"
+            className="-mr-2 flex h-11 items-center px-2 text-lg text-coral-ink"
           >
             + Add habit
           </Link>
         </div>
         {habits.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-foreground/20 p-4 text-center text-sm text-foreground/70">
+          <p className="rounded-2xl bg-white p-6 text-center italic text-muted">
             No habits yet. Add the first one for your group.
           </p>
         ) : (
           <ViewTabs
             today={
-              <div className="flex flex-col gap-2">
-                <ul className={listClass}>
+              <div className="flex flex-col gap-4">
+                <ul className="flex flex-col gap-3">
                   {habits.map((habit) => (
                     <li key={habit.id}>
                       <TodayHabit
@@ -115,15 +122,13 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
                     </li>
                   ))}
                 </ul>
-                <p className="text-xs text-foreground/60">
-                  Tap a habit to check it off for today.
-                </p>
+                <p className="italic text-muted">Tap a habit to check it off for today.</p>
               </div>
             }
             week={
-              <ul className={listClass}>
+              <ul className="flex flex-col gap-3">
                 {habits.map((habit) => (
-                  <li key={habit.id} className="pb-3">
+                  <li key={habit.id}>
                     <WeekHabit
                       name={habit.name}
                       members={memberNames}
@@ -138,36 +143,41 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
         )}
       </section>
 
-      <div className="flex flex-col gap-2">
+      <section className="flex flex-col gap-6">
+        <SectionHeading color="lavender">Invite friends</SectionHeading>
         {members.length === 1 && (
-          <p className="text-sm text-foreground/70">
+          <p className="italic text-muted">
             It&apos;s just you so far. Share the invite code so friends can join.
           </p>
         )}
         <CopyCodeButton code={group.invite_code} />
-      </div>
+      </section>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-foreground/70">
-          Members ({members.length})
-        </h2>
-        <ul className="flex flex-col divide-y divide-foreground/10 rounded-lg border border-foreground/15">
-          {members.map((member) => (
-            <li
-              key={member.user_id}
-              className="flex min-h-12 items-center justify-between px-4 py-2"
-            >
-              <span>
-                {member.profiles?.display_name ?? "Unknown"}
-                {member.user_id === userId && (
-                  <span className="text-foreground/60"> (you)</span>
+      <section className="flex flex-col gap-4">
+        <SectionHeading color="coral">Members</SectionHeading>
+        <ul className="flex flex-col divide-y divide-dashed divide-muted/30">
+          {members.map((member, index) => {
+            const name = member.profiles?.display_name ?? "Unknown";
+            return (
+              <li key={member.user_id} className="flex min-h-18 items-center gap-4 py-3">
+                <span
+                  aria-hidden
+                  className={`flex size-11 shrink-0 items-center justify-center rounded-full font-heading text-lg ${memberColor(index).avatar}`}
+                >
+                  {name.charAt(0).toUpperCase()}
+                </span>
+                <span className="flex-1 text-lg">
+                  {name}
+                  {member.user_id === userId && (
+                    <span className="italic text-muted"> (you)</span>
+                  )}
+                </span>
+                {member.role === "owner" && (
+                  <span className="italic text-coral-ink">owner</span>
                 )}
-              </span>
-              {member.role === "owner" && (
-                <span className="text-xs text-foreground/60">Owner</span>
-              )}
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       </section>
 
@@ -180,26 +190,28 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
   );
 }
 
-// Grey placeholder shapes shown while the group loads, roughly matching the
+// Pale placeholder shapes shown while the group loads, roughly matching the
 // real layout so the page doesn't jump around when it arrives.
 function GroupSkeleton() {
   return (
-    <div aria-busy="true" className="flex animate-pulse flex-col gap-6">
+    <div aria-busy="true" className="flex animate-pulse flex-col gap-10">
       <span className="sr-only">Loading group…</span>
-      <div className="h-8 w-2/3 rounded-md bg-foreground/10" />
-      <div className="h-13 rounded-lg bg-foreground/10" />
-      <div className="h-40 rounded-lg bg-foreground/10" />
-      <div className="h-14 rounded-lg bg-foreground/10" />
+      <div className="flex flex-col gap-2">
+        <div className="h-12 w-2/3 rounded-md bg-muted/15" />
+        <div className="h-5 w-1/3 rounded-md bg-muted/15" />
+      </div>
+      <div className="-mx-4 h-72 bg-sky-pale" />
+      <div className="h-20 rounded-2xl bg-lavender-pale" />
     </div>
   );
 }
 
 export default function GroupPage({ params }: PageProps<"/groups/[id]">) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-12 px-4 py-8">
       <Link
         href="/groups"
-        className="-ml-2 flex h-11 w-fit items-center px-2 text-sm text-foreground/70 hover:text-foreground"
+        className="-mb-8 -ml-2 flex h-11 w-fit items-center px-2 text-lg text-muted hover:text-foreground"
       >
         ← Your groups
       </Link>

@@ -24,7 +24,7 @@ export function LeaveGroupButton({ groupId, groupName, isLastMember }: Props) {
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="-ml-3 h-11 self-start rounded-lg px-3 text-sm text-red-600 hover:bg-red-600/10"
+        className="-ml-2 h-11 self-start px-2 text-lg text-coral-ink hover:underline"
       >
         Leave group
       </button>
@@ -32,8 +32,8 @@ export function LeaveGroupButton({ groupId, groupName, isLastMember }: Props) {
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-red-600/30 p-4">
-      <p className="text-sm">
+    <form action={formAction} className="flex flex-col gap-4 rounded-2xl bg-coral/10 p-5">
+      <p>
         Leave <span className="font-medium">{groupName}</span>?{" "}
         {isLastMember
           ? "You're the last member, so the group and all its habits will be deleted."
@@ -42,7 +42,7 @@ export function LeaveGroupButton({ groupId, groupName, isLastMember }: Props) {
       <div className="flex gap-2">
         <button
           disabled={pending}
-          className="h-11 flex-1 rounded-lg bg-red-600 font-medium text-white disabled:opacity-60"
+          className="h-11 flex-1 rounded-full bg-coral-ink text-lg text-white disabled:opacity-60"
         >
           {pending ? "Leaving…" : isLastMember ? "Leave and delete" : "Leave"}
         </button>
@@ -50,13 +50,13 @@ export function LeaveGroupButton({ groupId, groupName, isLastMember }: Props) {
           type="button"
           onClick={() => setConfirming(false)}
           disabled={pending}
-          className="h-11 flex-1 rounded-lg border border-foreground/20 font-medium"
+          className="h-11 flex-1 rounded-full bg-white text-lg"
         >
           Cancel
         </button>
       </div>
       {state.error && (
-        <p aria-live="polite" className="text-sm text-red-600">
+        <p aria-live="polite" className="text-coral-ink">
           {state.error}
         </p>
       )}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-// Shows the invite code; tapping it copies the code to the clipboard.
+// Shows the invite code, with a link-style button that copies it.
 export function CopyCodeButton({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -18,18 +18,20 @@ export function CopyCodeButton({ code }: { code: string }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={copy}
-      className="flex min-h-14 w-full items-center justify-between rounded-lg border border-foreground/15 px-4 py-3 text-left hover:bg-foreground/5"
-    >
-      <span className="flex flex-col">
-        <span className="text-xs text-foreground/60">Invite code</span>
-        <span className="font-mono text-xl tracking-widest">{code}</span>
+    <div className="flex items-center justify-between gap-4 rounded-2xl bg-lavender-pale px-6 py-5">
+      <span className="font-heading text-4xl tracking-[0.25em] text-lavender-ink">
+        <span className="sr-only">Invite code: </span>
+        {code}
       </span>
-      <span aria-live="polite" className="text-sm text-foreground/70">
-        {copied ? "Copied!" : "Tap to copy"}
-      </span>
-    </button>
+      <button
+        type="button"
+        onClick={copy}
+        className="flex h-11 shrink-0 items-center text-lg text-lavender-ink"
+      >
+        <span aria-live="polite" className="border-b border-dashed border-lavender-ink">
+          {copied ? "Copied!" : "Copy code"}
+        </span>
+      </button>
+    </div>
   );
 }

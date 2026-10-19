@@ -3,6 +3,7 @@
 import { useOptimistic, useState, useTransition } from "react";
 import { setCompletion } from "@/app/groups/actions";
 import { useToday } from "@/lib/use-today";
+import { memberColor } from "./member-colors";
 
 export type Member = { userId: string; name: string };
 export type Completion = { userId: string; date: string };
@@ -63,60 +64,58 @@ export function TodayHabit({
   const doneCount = memberStatus.filter((m) => m.done).length;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col rounded-2xl bg-white">
       <button
         type="button"
         role="checkbox"
         aria-checked={optimisticDone}
         disabled={today === null}
         onClick={toggle}
-        className="flex min-h-14 w-full items-center gap-3 px-4 py-2 text-left hover:bg-foreground/5"
+        className="flex min-h-14 w-full items-start gap-4 px-5 pt-5 pb-3 text-left"
       >
         <span
           aria-hidden
-          className={`flex size-7 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold ${
-            optimisticDone
-              ? "border-green-600 bg-green-600 text-white"
-              : "border-foreground/30"
+          className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-green text-white ${
+            optimisticDone ? "bg-green" : "bg-transparent"
           }`}
         >
           {optimisticDone && "✓"}
         </span>
         <span className="flex flex-col">
-          <span className="font-medium">{name}</span>
+          <span className="font-heading text-xl">{name}</span>
           {description && (
-            <span className="text-sm text-foreground/60">{description}</span>
+            <span className="italic text-lavender-ink">{description}</span>
           )}
         </span>
       </button>
       {error && (
-        <p aria-live="polite" className="px-4 pb-2 text-sm text-red-600">
+        <p aria-live="polite" className="px-5 pb-2 pl-17 text-coral-ink">
           {error}
         </p>
       )}
 
       {/* Who's done today. Hidden until the browser knows what "today" is. */}
       {today !== null && (
-        <div className="flex flex-col gap-1.5 px-4 pb-3 pl-14">
-          <p className="text-xs text-foreground/60">
-            {doneCount} of {members.length} done today
-          </p>
-          <ul className="flex flex-wrap gap-1.5">
-            {memberStatus.map((member) => (
-              <li
-                key={member.userId}
-                className={`rounded-full px-2.5 py-0.5 text-xs ${
-                  member.done
-                    ? "bg-green-600/15 text-green-700 dark:text-green-400"
-                    : "border border-dashed border-foreground/25 text-foreground/50"
-                }`}
-              >
-                {member.done && <span aria-hidden>✓ </span>}
-                {member.userId === myUserId ? "You" : member.name}
+        <div className="flex items-center justify-between gap-3 px-5 pb-5 pl-17">
+          <ul className="flex flex-wrap gap-x-4 gap-y-1">
+            {memberStatus.map((member, index) => (
+              <li key={member.userId} className="flex items-center gap-1.5">
+                <span
+                  aria-hidden
+                  className={`size-2.5 rounded-full border-[1.5px] ${memberColor(index).ring} ${
+                    member.done ? memberColor(index).dot : "bg-transparent"
+                  }`}
+                />
+                <span className={member.done ? "text-foreground" : "text-muted"}>
+                  {member.userId === myUserId ? "You" : member.name}
+                </span>
                 <span className="sr-only">{member.done ? " (done)" : " (not yet)"}</span>
               </li>
             ))}
           </ul>
+          <span className="shrink-0 rounded-full bg-green-pale px-3 py-0.5 text-green-ink">
+            {doneCount} / {members.length} done
+          </span>
         </div>
       )}
     </div>

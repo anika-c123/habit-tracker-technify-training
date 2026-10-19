@@ -1,26 +1,61 @@
 @import "tailwindcss";
 
+/* The app's palette. Each color becomes a Tailwind class through @theme
+   below, e.g. --color-sky → bg-sky, text-sky, border-sky. */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1f2433; /* main text */
+  --muted: #7a7f8c; /* secondary text */
+
+  --sky: #3ba9ec;
+  --coral: #f26b57;
+  --lavender: #a98bef;
+  --green: #34a86a;
+
+  /* Darker shades of the accents for small text, so it stays readable
+     (the bright versions are too light for text on white). */
+  --sky-ink: #1f6fa3;
+  --coral-ink: #b8432f;
+  --lavender-ink: #5b3fb0;
+  --green-ink: #22744a;
+
+  /* Very pale tints for panel backgrounds. */
+  --sky-pale: #f3f8fc;
+  --lavender-pale: #f5f2fd;
+  --green-pale: #e8f5ee;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-muted: var(--muted);
+  --color-sky: var(--sky);
+  --color-coral: var(--coral);
+  --color-lavender: var(--lavender);
+  --color-green: var(--green);
+  --color-sky-ink: var(--sky-ink);
+  --color-coral-ink: var(--coral-ink);
+  --color-lavender-ink: var(--lavender-ink);
+  --color-green-ink: var(--green-ink);
+  --color-sky-pale: var(--sky-pale);
+  --color-lavender-pale: var(--lavender-pale);
+  --color-green-pale: var(--green-pale);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Fonts are loaded in app/layout.tsx. font-serif = Newsreader (body),
+     font-heading = Fraunces (headings). */
+  --font-serif: var(--font-newsreader);
+  --font-heading: var(--font-fraunces);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
+}
+
+/* Every heading uses Fraunces. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-fraunces), Georgia, serif;
 }
