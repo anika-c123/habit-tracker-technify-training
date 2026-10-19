@@ -6,8 +6,10 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Run on every path except static files and images.
+  // Run on every path except static files, images, and the PWA files (the
+  // manifest and service worker must load even when you're logged out, or
+  // the app can't be installed from the login page).
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
