@@ -61,7 +61,16 @@ export default function GroupsPage() {
         </form>
       </header>
 
-      <Suspense fallback={<p className="text-sm text-foreground/60">Loading groups…</p>}>
+      <Suspense
+        fallback={
+          // Grey placeholder rows while your groups load.
+          <div aria-busy="true" className="flex animate-pulse flex-col gap-2">
+            <span className="sr-only">Loading groups…</span>
+            <div className="h-14 rounded-lg bg-foreground/10" />
+            <div className="h-14 rounded-lg bg-foreground/10" />
+          </div>
+        }
+      >
         <MyGroups />
       </Suspense>
 

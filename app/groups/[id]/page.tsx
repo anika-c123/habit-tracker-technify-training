@@ -12,6 +12,12 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
   const { id } = await params;
   const { supabase, userId } = await requireUser();
 
+  // Group ids are UUIDs. Anything else is a broken link, not a server error
+  // (the database would reject it as invalid input).
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    notFound();
+  }
+
   // The server doesn't know the user's time zone, but the user's "today" is
   // always within a day of the server's. So one query for everyone's
   // check-offs from 7 days ago to tomorrow (server time) covers both views:
@@ -44,8 +50,17 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
       .lte("completed_on", addDays(serverToday, 1)),
   ]);
 
+  // A query that fails (e.g. the network drops) is different from "no rows":
+  // show the error page with "Try again" instead of a misleading empty page.
+  const failed = [groupResult, habitsResult, membersResult, completionsResult].find(
+    (result) => result.error,
+  );
+  if (failed) {
+    throw new Error(`Couldn't load group: ${failed.error?.message}`);
+  }
+
   const group = groupResult.data;
-  if (groupResult.error || !group) {
+  if (!group) {
     notFound();
   }
 
@@ -122,7 +137,14 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
         )}
       </section>
 
-      <CopyCodeButton code={group.invite_code} />
+      <div className="flex flex-col gap-2">
+        {members.length === 1 && (
+          <p className="text-sm text-foreground/70">
+            It&apos;s just you so far. Share the invite code so friends can join.
+          </p>
+        )}
+        <CopyCodeButton code={group.invite_code} />
+      </div>
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-medium text-foreground/70">
@@ -151,6 +173,20 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
   );
 }
 
+// Grey placeholder shapes shown while the group loads, roughly matching the
+// real layout so the page doesn't jump around when it arrives.
+function GroupSkeleton() {
+  return (
+    <div aria-busy="true" className="flex animate-pulse flex-col gap-6">
+      <span className="sr-only">Loading group…</span>
+      <div className="h-8 w-2/3 rounded-md bg-foreground/10" />
+      <div className="h-13 rounded-lg bg-foreground/10" />
+      <div className="h-40 rounded-lg bg-foreground/10" />
+      <div className="h-14 rounded-lg bg-foreground/10" />
+    </div>
+  );
+}
+
 export default function GroupPage({ params }: PageProps<"/groups/[id]">) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-8">
@@ -161,7 +197,7 @@ export default function GroupPage({ params }: PageProps<"/groups/[id]">) {
         ← Your groups
       </Link>
       {/* The group id comes from the URL, which is request-time data. */}
-      <Suspense fallback={<p className="text-sm text-foreground/60">Loading group…</p>}>
+      <Suspense fallback={<GroupSkeleton />}>
         <GroupDetails params={params} />
       </Suspense>
     </main>

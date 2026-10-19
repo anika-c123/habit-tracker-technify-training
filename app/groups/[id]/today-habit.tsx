@@ -43,9 +43,14 @@ export function TodayHabit({
     setError(null);
     startTransition(async () => {
       setOptimisticDone(next);
-      const result = await setCompletion(habitId, today, next);
-      // If it failed, the checkbox flips back on its own; say why.
-      if (result.error) setError(result.error);
+      // If it fails, the checkbox flips back on its own; say why.
+      try {
+        const result = await setCompletion(habitId, today, next);
+        if (result.error) setError(result.error);
+      } catch {
+        // The request never reached the server (e.g. no signal).
+        setError("Couldn't reach the server. Check your connection and try again.");
+      }
     });
   }
 

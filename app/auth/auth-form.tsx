@@ -72,7 +72,11 @@ export function AuthForm({ action, submitLabel, askDisplayName, footer }: Props)
 
       <p className="text-center text-sm text-foreground/70">
         {footer.text}{" "}
-        <Link href={footer.href} className="font-medium text-foreground underline">
+        <Link
+          href={footer.href}
+          // inline-flex + min-h-11 makes the link a 44px-tall tap target.
+          className="inline-flex min-h-11 items-center font-medium text-foreground underline"
+        >
           {footer.linkLabel}
         </Link>
       </p>
