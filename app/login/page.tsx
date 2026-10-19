@@ -23,7 +23,13 @@ export default function LogInPage(props: PageProps<"/login">) {
         <SectionHeading as="h1" color="sky">
           Log in
         </SectionHeading>
-        <p className="italic text-muted">Welcome back. Your friends are waiting.</p>
+        <p className="italic text-muted">Welcome back.</p>
+        <figure className="mt-2 flex flex-col gap-1 border-l-2 border-lavender pl-4">
+          <blockquote className="text-xl italic text-lavender-ink">
+            &ldquo;We are what we repeatedly do.&rdquo;
+          </blockquote>
+          <figcaption className="text-muted">— Aristotle</figcaption>
+        </figure>
       </div>
       <Suspense>
         <ConfirmError {...props} />
