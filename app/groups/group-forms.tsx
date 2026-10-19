@@ -1,13 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
+import { inputClass, primaryButtonClass } from "@/app/ui/styles";
 import { createGroup, joinGroup, type GroupFormState } from "./actions";
 
 export function CreateGroupForm() {
   return (
     <OneFieldForm
       action={createGroup}
-      title="Create a group"
+      label="Group name"
       inputName="name"
       placeholder="e.g. Morning Runners"
       maxLength={50}
@@ -20,7 +21,7 @@ export function JoinGroupForm() {
   return (
     <OneFieldForm
       action={joinGroup}
-      title="Join with a code"
+      label="Invite code"
       inputName="code"
       placeholder="e.g. K7MXQ2"
       submitLabel="Join"
@@ -31,7 +32,7 @@ export function JoinGroupForm() {
 
 type Props = {
   action: (state: GroupFormState, formData: FormData) => Promise<GroupFormState>;
-  title: string;
+  label: string;
   inputName: string;
   placeholder: string;
   submitLabel: string;
@@ -39,10 +40,12 @@ type Props = {
   autoCapitalize?: string;
 };
 
-// A labeled text input + button, with the action's error shown underneath.
+// A text input + button, with the action's error shown underneath. The
+// section heading above says what it's for, so the label is for screen
+// readers only (sr-only hides it visually but keeps it accessible).
 function OneFieldForm({
   action,
-  title,
+  label,
   inputName,
   placeholder,
   submitLabel,
@@ -53,8 +56,8 @@ function OneFieldForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-2">
-      <label htmlFor={inputName} className="text-sm font-medium">
-        {title}
+      <label htmlFor={inputName} className="sr-only">
+        {label}
       </label>
       <div className="flex gap-2">
         <input
@@ -65,17 +68,17 @@ function OneFieldForm({
           maxLength={maxLength}
           autoCapitalize={autoCapitalize}
           autoComplete="off"
-          className="h-11 min-w-0 flex-1 rounded-lg border border-foreground/20 bg-transparent px-3 text-base outline-none focus:border-foreground"
+          className={`h-12 min-w-0 flex-1 ${inputClass}`}
         />
         <button
           disabled={pending}
-          className="h-11 shrink-0 rounded-lg bg-foreground px-5 font-medium text-background disabled:opacity-60"
+          className={`shrink-0 ${primaryButtonClass}`}
         >
           {pending ? "…" : submitLabel}
         </button>
       </div>
       {state.error && (
-        <p aria-live="polite" className="text-sm text-red-600">
+        <p aria-live="polite" className="text-coral-ink">
           {state.error}
         </p>
       )}

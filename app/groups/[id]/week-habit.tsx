@@ -2,7 +2,7 @@
 
 import { dayLabel, lastSevenDays } from "@/lib/dates";
 import { useToday } from "@/lib/use-today";
-import { memberColor } from "./member-colors";
+import { accentColor } from "@/app/ui/colors";
 import type { Completion, Member } from "./today-habit";
 
 type Props = {
@@ -58,7 +58,7 @@ export function WeekHabit({ name, members, myUserId, completions }: Props) {
               <th scope="row" className="truncate py-1 pl-5 text-left font-normal">
                 <span
                   aria-hidden
-                  className={`mr-1.5 inline-block size-2.5 rounded-full ${memberColor(index).dot}`}
+                  className={`mr-1.5 inline-block size-2.5 rounded-full ${accentColor(index).dot}`}
                 />
                 {member.userId === myUserId ? "You" : member.name}
               </th>

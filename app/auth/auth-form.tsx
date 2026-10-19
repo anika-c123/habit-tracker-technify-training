@@ -5,6 +5,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { inputClass as baseInputClass, primaryButtonClass } from "@/app/ui/styles";
 import type { AuthFormState } from "./actions";
 
 type Props = {
@@ -14,8 +15,8 @@ type Props = {
   footer: { text: string; linkLabel: string; href: string };
 };
 
-const inputClass =
-  "h-11 w-full rounded-lg border border-foreground/20 bg-transparent px-3 text-base outline-none focus:border-foreground";
+const inputClass = `h-12 ${baseInputClass}`;
+const labelClass = "flex flex-col gap-1.5 text-lg";
 
 export function AuthForm({ action, submitLabel, askDisplayName, footer }: Props) {
   // useActionState gives us: the latest result from the action, a wrapped
@@ -23,9 +24,9 @@ export function AuthForm({ action, submitLabel, askDisplayName, footer }: Props)
   const [state, formAction, pending] = useActionState(action, {});
 
   return (
-    <form action={formAction} className="flex w-full max-w-sm flex-col gap-4">
+    <form action={formAction} className="flex w-full flex-col gap-5">
       {askDisplayName && (
-        <label className="flex flex-col gap-1 text-sm font-medium">
+        <label className={labelClass}>
           Display name
           <input
             name="display_name"
@@ -36,7 +37,7 @@ export function AuthForm({ action, submitLabel, askDisplayName, footer }: Props)
           />
         </label>
       )}
-      <label className="flex flex-col gap-1 text-sm font-medium">
+      <label className={labelClass}>
         Email
         <input
           name="email"
@@ -46,7 +47,7 @@ export function AuthForm({ action, submitLabel, askDisplayName, footer }: Props)
           className={inputClass}
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm font-medium">
+      <label className={labelClass}>
         Password
         <input
           name="password"
@@ -58,26 +59,26 @@ export function AuthForm({ action, submitLabel, askDisplayName, footer }: Props)
         />
       </label>
 
-      <p aria-live="polite" className="min-h-5 text-sm">
-        {state.error && <span className="text-red-600">{state.error}</span>}
+      <p aria-live="polite" className="min-h-6">
+        {state.error && <span className="text-coral-ink">{state.error}</span>}
         {state.message && <span>{state.message}</span>}
       </p>
 
       <button
         disabled={pending}
-        className="h-11 rounded-lg bg-foreground font-medium text-background disabled:opacity-60"
+        className={primaryButtonClass}
       >
         {pending ? "Please wait…" : submitLabel}
       </button>
 
-      <p className="text-center text-sm text-foreground/70">
+      <p className="text-center text-muted">
         {footer.text}{" "}
         <Link
           href={footer.href}
           // inline-flex + min-h-11 makes the link a 44px-tall tap target.
-          className="inline-flex min-h-11 items-center font-medium text-foreground underline"
+          className="inline-flex min-h-11 items-center text-coral-ink"
         >
-          {footer.linkLabel}
+          <span className="border-b border-dashed border-coral-ink">{footer.linkLabel}</span>
         </Link>
       </p>
     </form>

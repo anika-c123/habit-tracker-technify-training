@@ -3,7 +3,7 @@
 import { useOptimistic, useState, useTransition } from "react";
 import { setCompletion } from "@/app/groups/actions";
 import { useToday } from "@/lib/use-today";
-import { memberColor } from "./member-colors";
+import { accentColor } from "@/app/ui/colors";
 
 export type Member = { userId: string; name: string };
 export type Completion = { userId: string; date: string };
@@ -102,8 +102,8 @@ export function TodayHabit({
               <li key={member.userId} className="flex items-center gap-1.5">
                 <span
                   aria-hidden
-                  className={`size-2.5 rounded-full border-[1.5px] ${memberColor(index).ring} ${
-                    member.done ? memberColor(index).dot : "bg-transparent"
+                  className={`size-2.5 rounded-full border-[1.5px] ${accentColor(index).ring} ${
+                    member.done ? accentColor(index).dot : "bg-transparent"
                   }`}
                 />
                 <span className={member.done ? "text-foreground" : "text-muted"}>

@@ -12,13 +12,20 @@ const waveColors = {
 type Props = {
   children: ReactNode;
   color: keyof typeof waveColors;
+  // "h1" for a page title (bigger), "h2" for a section (the default).
+  as?: "h1" | "h2";
 };
 
-// A big serif section heading with a short wavy line underneath.
-export function SectionHeading({ children, color }: Props) {
+// A big serif heading with a short wavy line underneath.
+export function SectionHeading({ children, color, as: Tag = "h2" }: Props) {
   return (
-    <div className="flex flex-col gap-1">
-      <h2 className="text-3xl font-medium tracking-tight">{children}</h2>
+    // Page titles get more room so the wave clears letters like g and p.
+    <div className={`flex flex-col ${Tag === "h1" ? "gap-3" : "gap-1"}`}>
+      <Tag
+        className={`font-medium tracking-tight ${Tag === "h1" ? "text-5xl" : "text-3xl"}`}
+      >
+        {children}
+      </Tag>
       <svg
         aria-hidden
         viewBox="0 0 72 8"

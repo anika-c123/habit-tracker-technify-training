@@ -6,7 +6,7 @@ import { SectionHeading } from "@/app/ui/section-heading";
 import { addDays, toDateString } from "@/lib/dates";
 import { CopyCodeButton } from "./copy-code-button";
 import { LeaveGroupButton } from "./leave-group-button";
-import { memberColor } from "./member-colors";
+import { accentColor } from "@/app/ui/colors";
 import { TodayHabit } from "./today-habit";
 import { ViewTabs } from "./view-tabs";
 import { WeekHabit } from "./week-habit";
@@ -162,7 +162,7 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
               <li key={member.user_id} className="flex min-h-18 items-center gap-4 py-3">
                 <span
                   aria-hidden
-                  className={`flex size-11 shrink-0 items-center justify-center rounded-full font-heading text-lg ${memberColor(index).avatar}`}
+                  className={`flex size-11 shrink-0 items-center justify-center rounded-full font-heading text-lg ${accentColor(index).avatar}`}
                 >
                   {name.charAt(0).toUpperCase()}
                 </span>

@@ -1,6 +1,7 @@
-// Each member gets one of the accent colors, by their position in the member
-// list, so the same person has the same color in every view on the page.
-// Class names are written out in full so Tailwind can find them.
+// The four accent colors, handed out in turn by position in a list: members
+// on a group page (so a person has the same color in every view), or groups
+// on the groups list. Class names are written out in full so Tailwind can
+// find them.
 const palette = [
   // dot = filled (done), ring = outline only (not done yet)
   { dot: "bg-sky", ring: "border-sky", avatar: "bg-sky/15 text-sky-ink" },
@@ -9,6 +10,6 @@ const palette = [
   { dot: "bg-green", ring: "border-green", avatar: "bg-green/15 text-green-ink" },
 ];
 
-export function memberColor(index: number) {
+export function accentColor(index: number) {
   return palette[index % palette.length];
 }
