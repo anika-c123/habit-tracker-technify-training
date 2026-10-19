@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { addDays, toDateString } from "@/lib/dates";
 import { CopyCodeButton } from "./copy-code-button";
+import { LeaveGroupButton } from "./leave-group-button";
 import { TodayHabit } from "./today-habit";
 import { ViewTabs } from "./view-tabs";
 import { WeekHabit } from "./week-habit";
@@ -169,6 +170,12 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
           ))}
         </ul>
       </section>
+
+      <LeaveGroupButton
+        groupId={id}
+        groupName={group.name}
+        isLastMember={members.length === 1}
+      />
     </>
   );
 }

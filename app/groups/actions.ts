@@ -125,3 +125,31 @@ export async function setCompletion(
   refresh();
   return {};
 }
+
+// Leave a group by deleting your own membership row. RLS only lets you delete
+// your own row. The database trigger from step 10 then hands ownership to the
+// next member, or deletes the group if you were the last one.
+export async function leaveGroup(
+  groupId: string,
+  // useActionState always passes the previous state; this action doesn't need it.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _prevState: GroupFormState,
+): Promise<GroupFormState> {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims) {
+    return { error: "You've been logged out. Please log in again." };
+  }
+
+  const { error } = await supabase
+    .from("group_members")
+    .delete()
+    .eq("group_id", groupId)
+    .eq("user_id", data.claims.sub);
+
+  if (error) {
+    return { error: "Couldn't leave the group. Please try again." };
+  }
+
+  redirect("/groups");
+}
