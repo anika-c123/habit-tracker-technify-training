@@ -1,51 +1,74 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
-import { connection } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
+import { requireUser } from "@/lib/auth";
 import { logOut } from "@/app/auth/actions";
+import { CreateGroupForm, JoinGroupForm } from "./group-forms";
 
-// Placeholder until step 5 builds the real groups list. For now it proves
-// that log-in works and that the profile row was created on sign-up.
-async function Welcome() {
-  // getClaims() checks the token's expiry against the current time, which
-  // Next can't bake into a prefetched page. connection() says "only render
-  // this part during a real request".
-  await connection();
+async function MyGroups() {
+  const { supabase } = await requireUser();
 
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
+  // No "where am I a member" filter needed: RLS only returns my groups.
+  // `group_members(count)` asks Supabase to count each group's members too.
+  const { data: groups, error } = await supabase
+    .from("groups")
+    .select("id, name, group_members(count)")
+    .order("name");
 
-  // proxy.ts already redirects logged-out users, but that's only a first
-  // line of defense: the page checks for itself too.
-  if (!data?.claims) {
-    redirect("/login");
+  if (error) {
+    return <p className="text-sm text-red-600">Couldn&apos;t load your groups.</p>;
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name")
-    .eq("id", data.claims.sub)
-    .single();
+  if (groups.length === 0) {
+    return (
+      <p className="rounded-lg border border-dashed border-foreground/20 p-4 text-center text-sm text-foreground/70">
+        You&apos;re not in any groups yet. Create one, or join with a code from a
+        friend.
+      </p>
+    );
+  }
 
   return (
-    <p className="text-foreground/70">
-      Hi, {profile?.display_name ?? "there"}! Your groups will show up here.
-    </p>
+    <ul className="flex flex-col gap-2">
+      {groups.map((group) => {
+        const memberCount = group.group_members[0]?.count ?? 0;
+        return (
+          <li key={group.id}>
+            <Link
+              href={`/groups/${group.id}`}
+              className="flex min-h-14 items-center justify-between rounded-lg border border-foreground/15 px-4 py-3 hover:bg-foreground/5"
+            >
+              <span className="font-medium">{group.name}</span>
+              <span className="text-sm text-foreground/60">
+                {memberCount} {memberCount === 1 ? "member" : "members"}
+              </span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
 export default function GroupsPage() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-6 px-4 py-12 text-center">
-      <h1 className="text-2xl font-semibold tracking-tight">Your groups</h1>
-      <Suspense fallback={<p className="text-foreground/60">Loading…</p>}>
-        <Welcome />
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-4 py-8">
+      <header className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight">Your groups</h1>
+        <form action={logOut}>
+          <button className="h-11 rounded-lg px-3 text-sm text-foreground/70 hover:text-foreground">
+            Log out
+          </button>
+        </form>
+      </header>
+
+      <Suspense fallback={<p className="text-sm text-foreground/60">Loading groups…</p>}>
+        <MyGroups />
       </Suspense>
-      <form action={logOut}>
-        <button className="h-11 rounded-lg border border-foreground/20 px-5 font-medium">
-          Log out
-        </button>
-      </form>
+
+      <section className="flex flex-col gap-6 border-t border-foreground/10 pt-6">
+        <CreateGroupForm />
+        <JoinGroupForm />
+      </section>
     </main>
   );
 }

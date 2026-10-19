@@ -25,6 +25,7 @@ A mobile-first habit tracker for small friend groups: users join private groups 
 - `npm run build` — production build + type check (run before calling a step done)
 - `npx supabase migration new <name>` — create a new migration file
 - `npx supabase db push` — apply migrations to the linked Supabase project
+- `npm run db:types` — regenerate `lib/database.types.ts` from the database (run after every `db push`; don't edit that file by hand)
 
 ## Database rules
 

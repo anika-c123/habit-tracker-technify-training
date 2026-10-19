@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import type { Database } from "@/lib/database.types";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Runs before every page request (see /proxy.ts). It refreshes the user's
@@ -6,7 +7,7 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
