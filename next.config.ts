@@ -8,6 +8,20 @@ const nextConfig: NextConfig = {
   // network address (the "Network:" line `npm run dev` prints). Update it if
   // that address changes.
   allowedDevOrigins: ["10.197.91.45"],
+  // The service worker (public/sw.js): never cache it, so phones always pick
+  // up a new version, and only let it load scripts from this site.
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self'" },
+        ],
+      },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {
