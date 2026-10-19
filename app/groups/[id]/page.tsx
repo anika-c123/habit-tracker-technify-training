@@ -10,8 +10,14 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
 
   // Run both queries at the same time. RLS returns nothing if you're not a
   // member, so outsiders get the same "not found" as a bad link.
-  const [groupResult, membersResult] = await Promise.all([
+  const [groupResult, habitsResult, membersResult] = await Promise.all([
     supabase.from("groups").select("name, invite_code").eq("id", id).maybeSingle(),
+    supabase
+      .from("habits")
+      .select("id, name, description")
+      .eq("group_id", id)
+      .is("archived_at", null)
+      .order("created_at"),
     supabase
       .from("group_members")
       // profiles(display_name) follows the user_id link to each member's profile.
@@ -25,11 +31,42 @@ async function GroupDetails({ params }: Pick<PageProps<"/groups/[id]">, "params"
     notFound();
   }
 
+  const habits = habitsResult.data ?? [];
   const members = membersResult.data ?? [];
 
   return (
     <>
       <h1 className="text-2xl font-semibold tracking-tight">{group.name}</h1>
+
+      <section className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-foreground/70">
+            Habits ({habits.length})
+          </h2>
+          <Link
+            href={`/groups/${id}/habits/new`}
+            className="-mr-2 flex h-11 items-center px-2 text-sm font-medium"
+          >
+            + Add habit
+          </Link>
+        </div>
+        {habits.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-foreground/20 p-4 text-center text-sm text-foreground/70">
+            No habits yet. Add the first one for your group.
+          </p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-foreground/10 rounded-lg border border-foreground/15">
+            {habits.map((habit) => (
+              <li key={habit.id} className="flex min-h-12 flex-col justify-center px-4 py-2">
+                <span className="font-medium">{habit.name}</span>
+                {habit.description && (
+                  <span className="text-sm text-foreground/60">{habit.description}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <CopyCodeButton code={group.invite_code} />
 
