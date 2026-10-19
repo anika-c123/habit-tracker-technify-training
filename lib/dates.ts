@@ -16,3 +16,18 @@ export function addDays(dateString: string, days: number): string {
   const [year, month, day] = dateString.split("-").map(Number);
   return toDateString(new Date(year, month - 1, day + days));
 }
+
+// The 7 days ending with `today`, oldest first: [today - 6, ..., today].
+export function lastSevenDays(today: string): string[] {
+  return [-6, -5, -4, -3, -2, -1, 0].map((offset) => addDays(today, offset));
+}
+
+// "2026-10-19" → { weekday: "M", day: 19 } for the week grid's column headers.
+export function dayLabel(dateString: string): { weekday: string; day: number } {
+  const [year, month, day] = dateString.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return {
+    weekday: date.toLocaleDateString(undefined, { weekday: "narrow" }),
+    day,
+  };
+}
