@@ -122,7 +122,8 @@ Each step is small, ends with something you can see or test, and gets its own co
    *Check:* both users see each other's check-offs.
 9. **Week view** — 7-day grid, loaded with a single date-range query.
    *Check:* grid matches the rows in the `completions` table.
-10. **Polish** — empty, loading, and error states; test on a real phone; tap targets ≥ 44px.
+10. **Polish** — empty, loading, and error states; test on a real phone; tap targets ≥ 44px. Plus an ownership hand-off migration: a trigger on deleting an `owner` row in `group_members` (leaving the group, or account deletion via cascade) promotes the longest-standing remaining member to `owner`, or deletes the group if nobody is left.
+    *Check:* SQL test — owner leaves → next member becomes owner; last member leaves → group is gone and its invite code no longer works.
 11. **Production deploy** — set env vars in Vercel; add the Vercel URL to Supabase Auth redirect URLs.
     *Check:* the full flow works on the live site from a phone.
 12. **PWA** (later) — `app/manifest.ts`, app icons, theme color, minimal service worker.
