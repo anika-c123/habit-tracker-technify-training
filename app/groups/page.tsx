@@ -66,7 +66,7 @@ export default function GroupsPage() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-12 px-4 py-8">
       <header className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-3">
           <h1 className="text-5xl font-medium tracking-tight">Your groups</h1>
           <p className="italic text-muted">Daily habits, with friends.</p>
         </div>
